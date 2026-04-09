@@ -1,10 +1,9 @@
-import uuid
-from datetime import datetime
-from sqlalchemy import String, Integer, Boolean, DateTime
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+import uuid as uuid_pkg 
+from datetime import datetime                                      # ← ESTA es la que cambias
+from sqlalchemy import String, Integer, Boolean, DateTime, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID               # ← ESTA se queda IGUAL
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
-
 
 class Minigame(Base):
     """
@@ -19,9 +18,9 @@ class Minigame(Base):
 
     __tablename__ = "minigame"
 
-    uuid: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    uuid: Mapped[uuid_pkg.UUID] = mapped_column(
+    UUID(as_uuid=True), primary_key=True, default=uuid_pkg.uuid4
+)
     name: Mapped[str] = mapped_column(String(120), nullable=False)
 
     exp_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

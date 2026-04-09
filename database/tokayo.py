@@ -1,6 +1,7 @@
-import uuid
-from sqlalchemy import String, Integer, Boolean, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+import uuid as uuid_pkg        
+from datetime import datetime                               # ← ESTA es la que cambias
+from sqlalchemy import String, Integer, Boolean, ForeignKey, DateTime
+from sqlalchemy.dialects.postgresql import UUID               # ← ESTA se queda IGUAL
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
 
@@ -16,9 +17,9 @@ class Tokayo(Base):
 
     __tablename__ = "tokayo"
 
-    uuid: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    uuid: Mapped[uuid_pkg.UUID] = mapped_column(
+    UUID(as_uuid=True), primary_key=True, default=uuid_pkg.uuid4
+)
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     owned_by_user: Mapped[str] = mapped_column(
         String(255),

@@ -1,6 +1,7 @@
-import uuid
-from sqlalchemy import Integer, Boolean, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+import uuid as uuid_pkg     
+from datetime import datetime                                 
+from sqlalchemy import String, Integer, Boolean, ForeignKey, DateTime
+from sqlalchemy.dialects.postgresql import UUID               
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
 
@@ -20,21 +21,29 @@ class InventoryItem(Base):
 
     __tablename__ = "inventory_item"
 
-    uuid: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    uuid: Mapped[uuid_pkg.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid_pkg.uuid4
     )
 
     # Denormalized for convenience — mirrors Tokayo.owned_by_user
     user_id: Mapped[str] = mapped_column(
-        # Not a FK — user lives outside this app (auth handled by API Gateway)
+        String,  # <-- Declaración explícita del tipo String
         nullable=False,
         index=True,
     )
 
     # Authoritative ownership: inventory belongs to a Tokayo
-    tokayo_id: Mapped[uuid.UUID] = mapped_column(
+    tokayo_id: Mapped[uuid_pkg.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("tokayo.uuid", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    # --- ESTO ES LO QUE FALTABA: LA REFERENCIA AL BLOQUE ---
+    block_id: Mapped[uuid_pkg.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("block.uuid", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -44,9 +53,11 @@ class InventoryItem(Base):
 
     # Relationships
     tokayo: Mapped["Tokayo"] = relationship("Tokayo", back_populates="inventory_items")
+    # lazy="joined" hace que el bloque se cargue en automático al consultar el inventario
+    block: Mapped["Block"] = relationship("Block", lazy="joined")
 
     def __repr__(self) -> str:
         return (
             f"<InventoryItem uuid={self.uuid} tokayo_id={self.tokayo_id} "
-            f"qty={self.quantity} equipped={self.equipped}>"
+            f"block_id={self.block_id} qty={self.quantity} equipped={self.equipped}>"
         )
